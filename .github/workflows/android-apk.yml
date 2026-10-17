@@ -1,3 +1,4 @@
+
 name: Build YARLSRI TV Android APK
 on:
   workflow_dispatch:
@@ -28,6 +29,8 @@ jobs:
           PYTHON
       - run: flutter pub get
       - run: flutter build apk --release
+        env:
+          GRADLE_OPTS: "-Dorg.gradle.vfs.watch=false"
       - uses: actions/upload-artifact@v4
         with:
           name: yarlsri-tv-android-apk
