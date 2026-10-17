@@ -1,22 +1,30 @@
 
+
 name: Build YARLSRI TV Android APK
+
 on:
   workflow_dispatch:
   push:
     branches: [main]
+
 permissions:
   contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
+
       - name: Generate Android project files
         run: flutter create --platforms=android --project-name yarlsri_tv --org tv.yarlsri .
+
       - name: Enable Internet for streaming
         run: |
           python3 - <<'PYTHON'
@@ -27,10 +35,21 @@ jobs:
               t=t.replace('<manifest xmlns:android="http://schemas.android.com/apk/res/android">', '<manifest xmlns:android="http://schemas.android.com/apk/res/android">\n    <uses-permission android:name="android.permission.INTERNET"/>')
           p.write_text(t)
           PYTHON
-      - run: flutter pub get
-      - run: flutter build apk --release
+
+      - name: Install Flutter packages
+        run: flutter pub get
+
+      - name: Generate App Icon
+        run: dart run flutter_launcher_icons
+
+      - name: Generate Splash Screen
+        run: dart run flutter_native_splash:create
+
+      - name: Build Android APK
+        run: flutter build apk --release
         env:
           GRADLE_OPTS: "-Dorg.gradle.vfs.watch=false"
+
       - uses: actions/upload-artifact@v4
         with:
           name: yarlsri-tv-android-apk
